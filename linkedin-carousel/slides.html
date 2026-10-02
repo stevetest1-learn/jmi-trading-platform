@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>JMI Trading Platform - LinkedIn carousel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+  /* 1080 x 1350 (4:5) slides: the portrait size LinkedIn shows largest on mobile.
+     Same dark palette as the app so the screenshots sit naturally on the page. */
+  @page { size: 1080px 1350px; margin: 0; }
+  :root {
+    --bg: #0b0d12;
+    --panel: #14171f;
+    --line: #262a35;
+    --text: #e6e8ec;
+    --dim: #8a8f9c;
+    --accent: #4f8cff;
+    --buy: #17c37b;
+    --sell: #f0463c;
+    --warn: #e0a940;
+    --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); }
+  body { font-family: var(--sans); color: var(--text); -webkit-font-smoothing: antialiased; }
+
+  .slide {
+    width: 1080px; height: 1350px; padding: 60px 72px 52px;
+    display: flex; flex-direction: column;
+    background: var(--bg); position: relative; overflow: hidden;
+    break-after: page; page-break-after: always;
+  }
+  .slide:last-child { break-after: auto; page-break-after: auto; }
+
+  .top, .foot {
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--mono); font-size: 21px; color: var(--dim); letter-spacing: .04em;
+  }
+  .brand { display: flex; align-items: center; gap: 14px; color: var(--text); font-weight: 600; letter-spacing: .02em; }
+  .mark { width: 36px; height: 36px; border-radius: 9px; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
+  .foot { margin-top: auto; padding-top: 22px; }
+  .foot b { color: var(--text); font-weight: 600; }
+
+  .eyebrow { margin-top: 34px; font-family: var(--mono); font-size: 24px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
+  h1 { margin: 14px 0 28px; font-size: 68px; line-height: 1.04; font-weight: 700; letter-spacing: -0.025em; text-wrap: balance; }
+  h1.big { font-size: 74px; }
+  .lede { margin: -6px 0 26px; font-size: 30px; line-height: 1.32; color: var(--dim); }
+
+  .shot { border: 2px solid var(--line); border-radius: 18px; overflow: hidden; background: var(--panel); box-shadow: 0 26px 64px rgba(0,0,0,.5); }
+  .shot img { display: block; width: 100%; }
+  .shot.flush { border: none; border-radius: 0; background: none; box-shadow: none; }
+  .crop { position: relative; overflow: hidden; }
+  .crop img { position: absolute; left: 0; top: 0; }
+
+  ul.points { list-style: none; margin: 30px 0 0; padding: 0; display: flex; flex-direction: column; gap: 20px; }
+  ul.points li { position: relative; padding-left: 38px; font-size: 31px; line-height: 1.3; }
+  ul.points li::before { content: ""; position: absolute; left: 0; top: 14px; width: 14px; height: 14px; border-radius: 3px; background: var(--accent); }
+  ul.points li b { font-weight: 600; }
+
+  /* ---------- slide 1: diagram ---------- */
+  svg.diagram { width: 936px; height: 700px; display: block; }
+  .d-box { fill: var(--panel); stroke: var(--line); stroke-width: 2; }
+  .d-core { fill: #101421; stroke: var(--accent); stroke-width: 2.5; }
+  .d-mod { fill: var(--panel); stroke: #34405e; stroke-width: 1.5; }
+  .d-title { font: 600 27px var(--sans); fill: var(--text); }
+  .d-name { font: 600 25px var(--sans); fill: var(--text); }
+  .d-sub { font: 400 20px var(--sans); fill: var(--dim); }
+  .d-tag { font: 500 16px var(--mono); fill: var(--dim); letter-spacing: .14em; }
+  .d-tag.sm { font-size: 15px; letter-spacing: .02em; }
+  .d-arrow { stroke: var(--accent); stroke-width: 3; fill: none; }
+  .d-aws { fill: none; stroke: #34405e; stroke-width: 2; stroke-dasharray: 8 7; }
+
+  /* ---------- slide 4: alert rules ---------- */
+  .rules { margin-top: 28px; display: flex; flex-direction: column; gap: 16px; }
+  .rule { display: flex; align-items: center; gap: 20px; font-size: 29px; line-height: 1.25; }
+  .pill { flex: none; width: 150px; text-align: center; font-family: var(--mono); font-size: 20px; font-weight: 600; letter-spacing: .08em; padding: 7px 0; border-radius: 8px; }
+  .pill.crit { color: var(--sell); background: rgba(240,70,60,.14); border: 1.5px solid rgba(240,70,60,.45); }
+  .pill.warn { color: var(--warn); background: rgba(224,169,64,.14); border: 1.5px solid rgba(224,169,64,.45); }
+  .note { margin-top: 26px; font-size: 27px; line-height: 1.35; color: var(--dim); }
+
+  /* ---------- slide 5: audit CSV ---------- */
+  .csv { margin-top: 26px; border: 2px solid var(--line); border-radius: 16px; background: var(--panel); padding: 18px 22px 16px; }
+  .csv-cap { font-family: var(--mono); font-size: 20px; color: var(--dim); margin-bottom: 12px; }
+  .csv-cap b { color: var(--text); font-weight: 600; }
+  .csv-grid { display: grid; grid-template-columns: 0.8fr 1fr .8fr 1.25fr 1.2fr .8fr 1.35fr; gap: 6px 10px; font-family: var(--mono); font-size: 21px; }
+  .csv-grid .h { color: var(--dim); font-size: 17px; letter-spacing: .02em; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  .csv-grid .buy { color: var(--buy); font-weight: 600; }
+  .csv-grid .sell { color: var(--sell); font-weight: 600; }
+  .csv-grid .pos { color: var(--buy); }
+
+  /* ---------- slide 6: results ---------- */
+  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .tile { border: 2px solid var(--line); border-radius: 18px; background: var(--panel); padding: 26px 28px 24px; }
+  .tile .n { font-family: var(--sans); font-size: 84px; font-weight: 700; line-height: 1; letter-spacing: -0.03em; }
+  .tile .n small { font-size: 36px; color: var(--dim); font-weight: 500; letter-spacing: 0; margin-left: 6px; }
+  .tile .l { margin-top: 12px; font-size: 25px; line-height: 1.3; color: var(--dim); }
+  .label { margin: 32px 0 0; font-family: var(--mono); font-size: 21px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+  ul.fit { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  ul.fit li { font-size: 27px; line-height: 1.28; padding-left: 32px; position: relative; }
+  ul.fit li::before { content: ""; position: absolute; left: 0; top: 11px; width: 13px; height: 13px; border-radius: 3px; background: var(--buy); }
+  .cta { margin-top: 30px; border: 2px solid var(--accent); border-radius: 18px; background: rgba(79,140,255,.10); padding: 24px 30px; }
+  .cta b { display: block; font-size: 36px; line-height: 1.15; letter-spacing: -0.01em; font-weight: 700; }
+  .cta span { display: block; margin-top: 8px; font-size: 26px; color: var(--dim); }
+  .fine { margin-top: 20px; font-size: 20px; line-height: 1.4; color: var(--dim); }
+</style>
+</head>
+<body>
+
+<!-- 1 / ARCHITECTURE -->
+<section class="slide">
+  <div class="top"><div class="brand"><span class="mark">JMI</span>Trading Platform</div><div>1 / 6</div></div>
+  <div class="eyebrow">Architecture</div>
+  <h1 class="big">I built a trading platform and a risk engine, end to end.</h1>
+  <p class="lede">Accounts trade each other through a real matching engine, and a risk cockpit watches every position.</p>
+
+  <svg class="diagram" viewBox="0 0 936 700" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="System architecture">
+    <defs>
+      <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#4f8cff"/>
+      </marker>
+    </defs>
+
+    <text class="d-tag" x="0" y="26">CLIENTS</text>
+    <text class="d-tag" x="300" y="26">PLATFORM</text>
+    <text class="d-tag" x="730" y="26">DATA</text>
+
+    <!-- clients -->
+    <rect class="d-box" x="0" y="60" width="210" height="150" rx="16"/>
+    <text class="d-title" x="22" y="112">React GUI</text>
+    <text class="d-sub" x="22" y="146">Alice, Bob and</text>
+    <text class="d-sub" x="22" y="172">Market Maker</text>
+
+    <rect class="d-box" x="0" y="290" width="210" height="150" rx="16"/>
+    <text class="d-title" x="22" y="342">FIX 4.4</text>
+    <text class="d-title" x="22" y="374">gateway</text>
+    <text class="d-sub" x="22" y="408">orders, quotes</text>
+
+    <!-- client arrows -->
+    <line class="d-arrow" x1="214" y1="140" x2="296" y2="140" marker-start="url(#ah)" marker-end="url(#ah)"/>
+    <text class="d-tag sm" x="219" y="124">REST·WS</text>
+    <line class="d-arrow" x1="214" y1="370" x2="296" y2="370" marker-start="url(#ah)" marker-end="url(#ah)"/>
+    <text class="d-tag sm" x="219" y="354">REST·WS</text>
+
+    <!-- platform -->
+    <rect class="d-core" x="300" y="50" width="360" height="470" rx="20"/>
+    <text class="d-title" x="322" y="92">FastAPI service</text>
+    <text class="d-sub" x="322" y="120">single-writer engine</text>
+
+    <rect class="d-mod" x="320" y="146" width="320" height="82" rx="12"/>
+    <text class="d-name" x="338" y="180">Matching engine</text>
+    <text class="d-sub" x="338" y="210">price/time priority</text>
+
+    <rect class="d-mod" x="320" y="238" width="320" height="82" rx="12"/>
+    <text class="d-name" x="338" y="272">Pre-trade risk checks</text>
+    <text class="d-sub" x="338" y="302">cash + inventory reserved</text>
+
+    <rect class="d-mod" x="320" y="330" width="320" height="82" rx="12"/>
+    <text class="d-name" x="338" y="364">Positions and P&amp;L</text>
+    <text class="d-sub" x="338" y="394">weighted-average cost</text>
+
+    <rect class="d-mod" x="320" y="422" width="320" height="82" rx="12" style="stroke:#4f8cff"/>
+    <text class="d-name" x="338" y="456">Risk &amp; Exposure API</text>
+    <text class="d-sub" x="338" y="486">role-gated, live push</text>
+
+    <!-- data -->
+    <rect class="d-box" x="730" y="60" width="206" height="190" rx="16"/>
+    <text class="d-title" x="750" y="112">PostgreSQL</text>
+    <text class="d-sub" x="750" y="148">orders, trades</text>
+    <text class="d-sub" x="750" y="174">positions</text>
+    <text class="d-sub" x="750" y="200">settlement</text>
+
+    <rect class="d-box" x="730" y="300" width="206" height="100" rx="16"/>
+    <text class="d-name" x="750" y="346">EOD close</text>
+    <text class="d-sub" x="750" y="376">T+0, idempotent</text>
+
+    <rect class="d-box" x="730" y="430" width="206" height="90" rx="16"/>
+    <text class="d-name" x="750" y="474">Trade CSV</text>
+    <text class="d-sub" x="750" y="502">daily audit trail</text>
+
+    <line class="d-arrow" x1="664" y1="155" x2="726" y2="155" marker-end="url(#ah)"/>
+    <line class="d-arrow" x1="833" y1="296" x2="833" y2="254" marker-end="url(#ah)"/>
+    <line class="d-arrow" x1="664" y1="475" x2="726" y2="475" marker-end="url(#ah)"/>
+
+    <!-- AWS -->
+    <rect class="d-aws" x="0" y="556" width="936" height="134" rx="18"/>
+    <text class="d-title" x="28" y="602">AWS, defined in Terraform</text>
+    <text x="908" y="600" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="19" font-weight="500" fill="#e0a940">validated, not deployed</text>
+    <text class="d-sub" x="28" y="640" style="font-size:22px">ECS Fargate · RDS Postgres · ALB · S3 + CloudFront · EventBridge</text>
+    <text class="d-sub" x="28" y="672" style="font-size:20px">44 resources, and no NAT gateway to keep the bill small</text>
+  </svg>
+
+  <div class="foot"><div>A simulation, built to run on a laptop</div><div><b>Swipe →</b></div></div>
+</section>
+
+<!-- 2 / ORDER BOOK -->
+<section class="slide">
+  <div class="top"><div class="brand"><span class="mark">JMI</span>Trading Platform</div><div>2 / 6</div></div>
+  <div class="eyebrow">The engine</div>
+  <h1>A real matching engine, not a price feed.</h1>
+
+  <div class="shot crop" style="aspect-ratio: 990 / 620;">
+    <img src="images/book.png" alt="Order book and order ticket" style="width: 202%;">
+  </div>
+
+  <ul class="points">
+    <li>Price/time priority. <b>Limit and market</b> orders.</li>
+    <li>Pre-trade checks reserve cash and inventory, so open orders can't over-commit an account.</li>
+    <li>Invalid orders are <b>rejected, never queued</b>.</li>
+  </ul>
+  <div class="foot"><div>BTC/USD and ETH/USD, accounts trading each other</div><div><b>Swipe →</b></div></div>
+</section>
+
+<!-- 3 / RISK COCKPIT -->
+<section class="slide">
+  <div class="top"><div class="brand"><span class="mark">JMI</span>Trading Platform</div><div>3 / 6</div></div>
+  <div class="eyebrow">The risk engine</div>
+  <h1>Every account's exposure, live.</h1>
+
+  <div class="shot crop" style="aspect-ratio: 2000 / 1142;">
+    <img src="images/cockpit.png" alt="Risk and exposure cockpit" style="width: 100%; top: -2.4%;">
+  </div>
+
+  <ul class="points">
+    <li>Positions, P&amp;L and concentration for <b>every account</b>, valued at mid, else last trade.</li>
+    <li>No price yet? It shows as <b>unvalued</b>, never as zero.</li>
+    <li>Pushed over WebSocket. Only the market maker can open it, <b>enforced on the server</b>.</li>
+  </ul>
+  <div class="foot"><div>Market maker's view of all three accounts</div><div><b>Swipe →</b></div></div>
+</section>
+
+<!-- 4 / ALERT -->
+<section class="slide">
+  <div class="top"><div class="brand"><span class="mark">JMI</span>Trading Platform</div><div>4 / 6</div></div>
+  <div class="eyebrow">Alerting</div>
+  <h1>It flags the problem before a person has to.</h1>
+
+  <div class="shot flush"><img src="images/alerts.png" alt="Risk alerts panel"></div>
+
+  <div class="rules">
+    <div class="rule"><span class="pill crit">CRITICAL</span><span>One account holds over 70% of a symbol's inventory</span></div>
+    <div class="rule"><span class="pill warn">WARNING</span><span>Reserved cash is 80% or more of an account's balance</span></div>
+    <div class="rule"><span class="pill warn">WARNING</span><span>A held symbol has no price, so exposure is unvalued</span></div>
+  </div>
+  <div class="note">Thresholds are config, not code. Alerts are computed live from current positions, so they clear on their own.</div>
+  <div class="foot"><div>Real output from the demo session</div><div><b>Swipe →</b></div></div>
+</section>
+
+<!-- 5 / BLOTTER + AUDIT -->
+<section class="slide">
+  <div class="top"><div class="brand"><span class="mark">JMI</span>Trading Platform</div><div>5 / 6</div></div>
+  <div class="eyebrow">Audit trail</div>
+  <h1>Every fill and every reject, on the record.</h1>
+
+  <div class="shot"><img src="images/blotter.png" alt="Executions blotter with fills and a reject"></div>
+
+  <div class="csv">
+    <div class="csv-cap"><b>trade_logs/YYYYMMDD.csv</b> · one trade, both counterparties</div>
+    <div class="csv-grid">
+      <div class="h">trade_id</div><div class="h">account</div><div class="h">side</div><div class="h">order_price</div><div class="h">fill_price</div><div class="h">qty</div><div class="h">realized_pnl</div>
+      <!--CSV_ROWS-->
+    </div>
+  </div>
+
+  <ul class="points" style="margin-top: 26px; gap: 14px;">
+    <li>Rejects <b>keep their reason</b>. Nothing is silently dropped.</li>
+    <li>Both sides show the order price against the price executed, and P&amp;L at that moment.</li>
+    <li><b>T+0 settlement</b>, with an idempotent end-of-day close.</li>
+  </ul>
+  <div class="foot"><div>Alice's blotter, and a peer-to-peer trade</div><div><b>Swipe →</b></div></div>
+</section>
+
+<!-- 6 / RESULTS -->
+<section class="slide">
+  <div class="top"><div class="brand"><span class="mark">JMI</span>Trading Platform</div><div>6 / 6</div></div>
+  <div class="eyebrow">Results</div>
+  <h1>What I'd bring to your desk.</h1>
+
+  <div class="tiles">
+    <div class="tile"><div class="n">31</div><div class="l">automated tests passing, including a FIX end-to-end</div></div>
+    <div class="tile"><div class="n">3<small>ms</small></div><div class="l">median order ack, and 9 ms when it fills</div></div>
+    <div class="tile"><div class="n">43<small>ms</small></div><div class="l">from a fill to the risk view update</div></div>
+    <div class="tile"><div class="n">5.7<small>k</small></div><div class="l">lines of Python, TypeScript and Terraform</div></div>
+  </div>
+
+  <div class="label">Where it maps to the job</div>
+  <ul class="fit">
+    <li>Pre-trade risk controls and entitlements</li>
+    <li>Position, P&amp;L and settlement logic</li>
+    <li>FIX connectivity and real-time data</li>
+    <li>Cloud infrastructure as code, cost-aware</li>
+  </ul>
+
+  <div class="cta"><b>Open to roles in trading technology and risk.</b><span>Message me and I'll walk you through the demo.</span></div>
+  <div class="fine">A simulation, not production. The FIX gateway is a template and the AWS stack is validated, not deployed. Latencies measured on a laptop with a local database.</div>
+  <div class="foot"><div>JMI Trading Platform</div><div></div></div>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.env
+.env.local
+.DS_Store
+
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+trade_logs/
+.claude/
+linkedin-carousel/_rendered.html
+*.tfstate
+*.tfstate.*

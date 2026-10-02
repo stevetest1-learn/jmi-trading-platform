@@ -1,0 +1,359 @@
+<title>Risk &amp; Exposure Cockpit</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap">
+<style>
+  /* Layout concept: cockpit — KPI strip, then exposure-chart/alerts split,
+     then the full account grid, summary before detail for a risk desk
+     scanning for breaches rather than reading top to bottom. */
+  :root{
+    --bg:#0a0c10; --panel:#12151b; --panel-2:#171b23; --border:#232833;
+    --text:#e7eaf0; --text-dim:#8992a3; --text-faint:#5b6372;
+    --accent:#5b8def; --accent-dim:#5b8def33;
+    --pos:#2fbf80; --pos-dim:#2fbf8022;
+    --neg:#e5484d; --neg-dim:#e5484d22;
+    --warn:#e0a940; --warn-dim:#e0a94022;
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#f3f5f8; --panel:#ffffff; --panel-2:#f8f9fb; --border:#dde1e8;
+      --text:#141822; --text-dim:#5b6372; --text-faint:#8992a3;
+      --accent:#2f5fd1; --accent-dim:#2f5fd11a;
+      --pos:#1f8f5a; --pos-dim:#1f8f5a1a;
+      --neg:#c23338; --neg-dim:#c233381a;
+      --warn:#a9790a; --warn-dim:#a9790a1a;
+      color-scheme: light;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0a0c10; --panel:#12151b; --panel-2:#171b23; --border:#232833;
+    --text:#e7eaf0; --text-dim:#8992a3; --text-faint:#5b6372;
+    --accent:#5b8def; --accent-dim:#5b8def33;
+    --pos:#2fbf80; --pos-dim:#2fbf8022;
+    --neg:#e5484d; --neg-dim:#e5484d22;
+    --warn:#e0a940; --warn-dim:#e0a94022;
+    color-scheme: dark;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--bg); color:var(--text); margin:0;
+    font-family:'IBM Plex Sans', -apple-system, Segoe UI, sans-serif;
+    padding-inline:20px; padding-block:20px 40px;
+  }
+  .mono{font-family:'IBM Plex Mono', ui-monospace, Menlo, monospace; font-variant-numeric: tabular-nums;}
+  .wrap{max-width:1180px; margin:0 auto; display:flex; flex-direction:column; gap:20px;}
+
+  /* ---------- header ---------- */
+  header{
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px;
+    padding-bottom:14px; border-bottom:1px solid var(--border);
+  }
+  .brand{display:flex; align-items:center; gap:12px; min-width:0;}
+  .brand-mark{
+    width:38px; height:38px; border-radius:9px; background:var(--accent); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex:none;
+  }
+  h1{font-size:19px; margin:0; font-weight:600; letter-spacing:-.01em;}
+  .subtitle{font-size:12.5px; color:var(--text-dim); margin-top:2px;}
+  .header-right{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .live{
+    display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text-dim);
+    padding:6px 10px; border:1px solid var(--border); border-radius:999px; background:var(--panel);
+  }
+  .live-dot{width:7px; height:7px; border-radius:50%; background:var(--pos); box-shadow:0 0 0 3px var(--pos-dim);
+    animation:pulse 2s ease-in-out infinite;}
+  @media (prefers-reduced-motion: reduce){ .live-dot{animation:none} }
+  @keyframes pulse{0%,100%{opacity:1} 50%{opacity:.45}}
+  .demo-badge{
+    font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--warn); background:var(--warn-dim); border:1px solid var(--warn); border-radius:5px;
+    padding:4px 8px;
+  }
+
+  /* ---------- KPI strip ---------- */
+  .kpis{display:grid; grid-template-columns:repeat(5,1fr); gap:12px;}
+  @media (max-width:860px){ .kpis{grid-template-columns:repeat(2,1fr)} }
+  .kpi{
+    background:var(--panel); border:1px solid var(--border); border-radius:10px;
+    padding:14px 16px; min-width:0;
+  }
+  .kpi-label{font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em;}
+  .kpi-value{font-size:22px; font-weight:600; margin-top:6px; letter-spacing:-.01em;}
+  .kpi-sub{font-size:11.5px; color:var(--text-faint); margin-top:4px;}
+  .kpi-value.pos{color:var(--pos)} .kpi-value.neg{color:var(--neg)} .kpi-value.warn{color:var(--warn)}
+
+  /* ---------- panels ---------- */
+  .panel{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px; min-width:0;}
+  .panel-title{font-size:13px; font-weight:600; display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
+  .panel-title .count{font-size:11px; color:var(--text-dim); font-weight:500;}
+
+  .split{display:grid; grid-template-columns:1.15fr 1fr; gap:16px;}
+  @media (max-width:860px){ .split{grid-template-columns:1fr} }
+
+  /* ---------- exposure bars ---------- */
+  .exposure-row{margin-bottom:16px;}
+  .exposure-row:last-child{margin-bottom:0;}
+  .exposure-head{display:flex; justify-content:space-between; align-items:baseline; font-size:12.5px; margin-bottom:6px;}
+  .exposure-head .sym{font-weight:600;}
+  .exposure-head .amt{color:var(--text-dim);}
+  .stack-bar{display:flex; height:22px; border-radius:6px; overflow:hidden; border:1px solid var(--border);}
+  .stack-seg{display:flex; align-items:center; justify-content:center; font-size:10.5px; font-weight:600; color:#0a0c10; white-space:nowrap; overflow:hidden;}
+  .seg-a{background:var(--accent);} .seg-b{background:#8aa6e8;} .seg-c{background:#c6d4f5;}
+  .legend{display:flex; gap:14px; margin-top:10px; flex-wrap:wrap;}
+  .legend-item{display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--text-dim);}
+  .swatch{width:9px; height:9px; border-radius:2px; flex:none;}
+
+  /* ---------- alerts ---------- */
+  .alert{
+    display:flex; gap:10px; padding:10px 12px; border-radius:8px; border:1px solid var(--border);
+    background:var(--panel-2); margin-bottom:8px; align-items:flex-start;
+  }
+  .alert:last-child{margin-bottom:0;}
+  .alert-stripe{width:3px; align-self:stretch; border-radius:2px; flex:none;}
+  .alert.critical .alert-stripe{background:var(--neg);}
+  .alert.warning .alert-stripe{background:var(--warn);}
+  .alert.info .alert-stripe{background:var(--accent);}
+  .alert-body{min-width:0;}
+  .alert-top{display:flex; gap:8px; align-items:center; font-size:11px; margin-bottom:3px;}
+  .sev-pill{text-transform:uppercase; letter-spacing:.04em; font-weight:700; font-size:10px; padding:2px 6px; border-radius:4px;}
+  .alert.critical .sev-pill{color:var(--neg); background:var(--neg-dim);}
+  .alert.warning .sev-pill{color:var(--warn); background:var(--warn-dim);}
+  .alert.info .sev-pill{color:var(--accent); background:var(--accent-dim);}
+  .alert-time{color:var(--text-faint);}
+  .alert-text{font-size:12.5px; line-height:1.4;}
+  .alert-text b{font-weight:600;}
+
+  /* ---------- account table ---------- */
+  .table-scroll{overflow-x:auto;}
+  table{width:100%; border-collapse:collapse; min-width:720px;}
+  th{
+    text-align:right; font-size:10.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.04em;
+    font-weight:600; padding:0 10px 10px; border-bottom:1px solid var(--border); white-space:nowrap;
+  }
+  th:first-child, td:first-child{text-align:left;}
+  td{padding:11px 10px; font-size:13px; border-bottom:1px solid var(--border); text-align:right; white-space:nowrap;}
+  tr:last-child td{border-bottom:none;}
+  .acct-cell{display:flex; align-items:center; gap:8px; font-weight:600;}
+  .acct-dot{width:7px; height:7px; border-radius:50%; flex:none;}
+  .pos{color:var(--pos)} .neg{color:var(--neg)}
+  .share-cell{display:flex; align-items:center; gap:8px; justify-content:flex-end;}
+  .share-track{width:48px; height:5px; border-radius:3px; background:var(--border); overflow:hidden;}
+  .share-fill{height:100%; background:var(--accent);}
+  .share-fill.hot{background:var(--neg);}
+  tfoot td{font-weight:700; border-top:1px solid var(--border); border-bottom:none; padding-top:12px;}
+
+  /* ---------- api footer ---------- */
+  .api-panel{display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;}
+  .api-text{flex:1 1 260px; min-width:0;}
+  .api-text p{font-size:12.5px; color:var(--text-dim); line-height:1.5; margin:0;}
+  .api-text b{color:var(--text);}
+  pre.api-code{
+    flex:1 1 320px; min-width:0; margin:0; background:var(--bg); border:1px solid var(--border);
+    border-radius:8px; padding:12px 14px; font-size:11.5px; line-height:1.6; overflow-x:auto; color:var(--text-dim);
+  }
+  pre.api-code .kw{color:var(--accent);}
+  pre.api-code .str{color:var(--pos);}
+</style>
+
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="brand-mark">JMI</div>
+      <div>
+        <h1>Risk &amp; Exposure Cockpit</h1>
+        <div class="subtitle">Institutional view — platform-wide exposure, concentration &amp; P&amp;L</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="demo-badge">Illustrative data</span>
+      <span class="live"><span class="live-dot"></span> Live feed · updated <span id="clock" class="mono">just now</span></span>
+    </div>
+  </header>
+
+  <section class="kpis">
+    <div class="kpi">
+      <div class="kpi-label">Platform net exposure</div>
+      <div class="kpi-value mono">$3,801,840</div>
+      <div class="kpi-sub">BTC/USD + ETH/USD, at mark</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Unrealized P&amp;L</div>
+      <div class="kpi-value mono pos">+$460,531</div>
+      <div class="kpi-sub">Across 3 accounts, live mark</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Realized P&amp;L (today)</div>
+      <div class="kpi-value mono pos">+$6,420</div>
+      <div class="kpi-sub">Since 00:00 UTC settlement</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Active alerts</div>
+      <div class="kpi-value warn">1 critical · 1 warning</div>
+      <div class="kpi-sub">Concentration &amp; utilization</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Accounts monitored</div>
+      <div class="kpi-value mono">3</div>
+      <div class="kpi-sub">2 symbols · T+0 settlement</div>
+    </div>
+  </section>
+
+  <section class="split">
+    <div class="panel">
+      <div class="panel-title">Exposure by symbol <span class="count">share of platform inventory</span></div>
+
+      <div class="exposure-row">
+        <div class="exposure-head">
+          <span class="sym">BTC/USD</span>
+          <span class="amt mono">51.50 BTC · $3,166,220</span>
+        </div>
+        <div class="stack-bar">
+          <div class="stack-seg seg-a" style="width:74.9%">Market Maker 74.9%</div>
+          <div class="stack-seg seg-b" style="width:14.0%"></div>
+          <div class="stack-seg seg-c" style="width:11.1%"></div>
+        </div>
+      </div>
+
+      <div class="exposure-row">
+        <div class="exposure-head">
+          <span class="sym">ETH/USD</span>
+          <span class="amt mono">610.00 ETH · $635,620</span>
+        </div>
+        <div class="stack-bar">
+          <div class="stack-seg seg-a" style="width:79.3%">Market Maker 79.3%</div>
+          <div class="stack-seg seg-b" style="width:11.4%"></div>
+          <div class="stack-seg seg-c" style="width:9.3%"></div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <div class="legend-item"><span class="swatch" style="background:var(--accent)"></span>Market Maker</div>
+        <div class="legend-item"><span class="swatch" style="background:#8aa6e8"></span>Bob</div>
+        <div class="legend-item"><span class="swatch" style="background:#c6d4f5"></span>Alice</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Risk alerts <span class="count">2 open</span></div>
+
+      <div class="alert critical">
+        <div class="alert-stripe"></div>
+        <div class="alert-body">
+          <div class="alert-top"><span class="sev-pill">Critical</span><span class="alert-time mono">2 min ago</span></div>
+          <div class="alert-text"><b>Concentration limit breach</b> — Market Maker holds 74.9% of platform BTC/USD inventory (limit: 70%).</div>
+        </div>
+      </div>
+
+      <div class="alert warning">
+        <div class="alert-stripe"></div>
+        <div class="alert-body">
+          <div class="alert-top"><span class="sev-pill">Warning</span><span class="alert-time mono">18 min ago</span></div>
+          <div class="alert-text"><b>Buying power utilization</b> — Bob's reserved USD reached 82% of configured soft limit.</div>
+        </div>
+      </div>
+
+      <div class="alert info">
+        <div class="alert-stripe"></div>
+        <div class="alert-body">
+          <div class="alert-top"><span class="sev-pill">Info</span><span class="alert-time mono">41 min ago</span></div>
+          <div class="alert-text"><b>Exposure shift</b> — ETH/USD platform net exposure up 18% over the last hour.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-title">Account risk detail <span class="count">sorted by platform share</span></div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Account</th>
+            <th>BTC qty</th>
+            <th>BTC notional</th>
+            <th>ETH qty</th>
+            <th>ETH notional</th>
+            <th>Total exposure</th>
+            <th>Unrealized P&amp;L</th>
+            <th>Realized P&amp;L (today)</th>
+            <th>Platform share</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="acct-cell"><span class="acct-dot" style="background:var(--accent)"></span>Market Maker</span></td>
+            <td class="mono">38.55</td>
+            <td class="mono">$2,370,114</td>
+            <td class="mono">484.00</td>
+            <td class="mono">$504,328</td>
+            <td class="mono">$2,874,442</td>
+            <td class="mono pos">+$427,507</td>
+            <td class="mono pos">+$4,320</td>
+            <td><span class="share-cell"><span class="share-track"><span class="share-fill hot" style="width:76%"></span></span><span class="mono">75.6%</span></span></td>
+          </tr>
+          <tr>
+            <td><span class="acct-cell"><span class="acct-dot" style="background:#8aa6e8"></span>Bob</span></td>
+            <td class="mono">7.20</td>
+            <td class="mono">$442,656</td>
+            <td class="mono">69.30</td>
+            <td class="mono">$72,211</td>
+            <td class="mono">$514,867</td>
+            <td class="mono pos">+$12,456</td>
+            <td class="mono pos">+$860</td>
+            <td><span class="share-cell"><span class="share-track"><span class="share-fill" style="width:14%"></span></span><span class="mono">13.5%</span></span></td>
+          </tr>
+          <tr>
+            <td><span class="acct-cell"><span class="acct-dot" style="background:#c6d4f5"></span>Alice</span></td>
+            <td class="mono">5.75</td>
+            <td class="mono">$353,510</td>
+            <td class="mono">56.70</td>
+            <td class="mono">$59,081</td>
+            <td class="mono">$412,591</td>
+            <td class="mono pos">+$18,350</td>
+            <td class="mono pos">+$1,240</td>
+            <td><span class="share-cell"><span class="share-track"><span class="share-fill" style="width:11%"></span></span><span class="mono">10.9%</span></span></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>Platform total</td>
+            <td class="mono">51.50</td>
+            <td class="mono">$3,166,220</td>
+            <td class="mono">610.00</td>
+            <td class="mono">$635,620</td>
+            <td class="mono">$3,801,840</td>
+            <td class="mono pos">+$460,313</td>
+            <td class="mono pos">+$6,420</td>
+            <td class="mono">100%</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel api-panel">
+    <div class="api-text">
+      <p><b>How this would actually connect.</b> Every figure above is a live read of the same positions/accounts data the trading GUI already uses — this view just adds a privileged, cross-account aggregation layer with its own service credential, separate from any client's login. A bank's risk systems would poll the REST snapshot or subscribe to the WebSocket stream; this page itself would be the reference embeddable widget, built on that same API.</p>
+    </div>
+    <pre class="api-code mono"><span class="kw">GET</span> /risk/exposure?symbol=BTCUSD
+<span class="kw">GET</span> /risk/accounts
+<span class="kw">GET</span> /risk/alerts?status=open
+<span class="kw">WS</span>  /risk/stream  <span class="str">// pushes the same rows, live</span></pre>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  try{
+    var el = document.getElementById('clock');
+    var start = Date.now();
+    setInterval(function(){
+      var s = Math.floor((Date.now()-start)/1000);
+      el.textContent = s < 5 ? 'just now' : s + 's ago';
+    }, 1000);
+  }catch(e){}
+})();
+</script>

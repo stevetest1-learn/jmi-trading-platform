@@ -1,0 +1,3 @@
+timestamp,trade_id,symbol,account,side,order_id,order_type,order_price,order_qty,fill_qty,fill_price,realized_pnl_this_fill,realized_pnl_today_after,realized_pnl_total_after,net_qty_after,avg_cost_after
+2026-10-02T12:40:51.431767+00:00,5,BTCUSD,bob,BUY,20,LIMIT,60040,0.1,0.1,60040,0,-10.00000000,-10.00000000,0.65000000,60006.15384615384615384615385
+2026-10-02T12:40:51.431771+00:00,5,BTCUSD,alice,SELL,19,LIMIT,60040.00000000,0.10000000,0.1,60040,2.571428571,2.571428571,2.571428571,0.95000000,60014.28571429
