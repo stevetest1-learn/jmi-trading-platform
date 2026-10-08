@@ -9,6 +9,7 @@ os.environ.setdefault(
     "DATABASE_URL", "postgresql+asyncpg://jmi:jmi_dev_password@localhost:5432/jmi_trading_test"
 )
 os.environ.setdefault("JWT_SECRET", "test-secret")
+os.environ.setdefault("COINBASE_ENABLED", "false")  # tests never touch the network
 # Isolate the trade-log CSV to a throwaway directory for the whole test run,
 # so `pytest` never writes synthetic test trades into the real trade_logs/
 # at the repo root. Individual tests (test_trade_log.py) can still override

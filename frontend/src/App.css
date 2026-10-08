@@ -829,3 +829,101 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- Coinbase reference price bar ---------- */
+
+.ref-bar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "main stats spark"
+    "note note note";
+  align-items: center;
+  gap: 10px 28px;
+  margin: 14px 24px 0;
+  padding: 14px 20px 10px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+}
+
+.ref-bar--dim {
+  opacity: 0.6;
+}
+
+.ref-bar--empty {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+}
+
+.ref-bar__main { grid-area: main; min-width: 0; }
+.ref-bar__stats { grid-area: stats; }
+.ref-spark { grid-area: spark; width: 180px; height: 48px; display: block; }
+.ref-spark--empty { background: transparent; }
+.ref-bar__note { grid-area: note; font-size: 11.5px; color: var(--text-dim); }
+.ref-bar__hint { color: var(--text-dim); font-size: 13px; }
+
+.ref-bar__source {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.ref-bar__price {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 4px;
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.ref-tick { font-size: 13px; }
+.ref-tick--up { color: var(--buy); }
+.ref-tick--down { color: var(--sell); }
+
+.ref-bar__change { margin-top: 2px; font-size: 13px; }
+.ref-bar__window { color: var(--text-dim); font-family: var(--sans); }
+
+.ref-bar__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px 18px;
+}
+
+.ref-stat { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.ref-stat__label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; }
+.ref-stat__value { font-size: 14px; white-space: nowrap; }
+
+.ref-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.ref-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.ref-badge--live { color: var(--buy); background: var(--buy-bg); }
+.ref-badge--stale { color: #e0a940; background: rgba(224, 169, 64, 0.14); }
+.ref-badge--down { color: var(--sell); background: var(--sell-bg); }
+
+@media (max-width: 1000px) {
+  .ref-bar {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "main spark"
+      "stats stats"
+      "note note";
+  }
+}

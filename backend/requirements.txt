@@ -8,6 +8,7 @@ sortedcontainers==2.4.0
 bcrypt==4.2.1
 pyjwt==2.10.1
 httpx==0.28.1
+websockets==17.1
 
 pytest==8.3.4
 pytest-asyncio==0.25.0

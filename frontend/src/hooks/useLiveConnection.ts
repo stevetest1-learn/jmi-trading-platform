@@ -36,6 +36,13 @@ export function useLiveConnection(
       } catch {
         // best effort; WS deltas keep arriving regardless
       }
+      // Separate on purpose: Coinbase being unreachable must never block our own data.
+      try {
+        const snapshot = await api.refPrices();
+        if (!cancelled) useTradingStore.getState().setRefSnapshot(snapshot);
+      } catch {
+        // the bar just shows "unavailable"
+      }
     };
 
     const connect = () => {
@@ -91,6 +98,12 @@ export function useLiveConnection(
             break;
           case "risk_dirty":
             store.bumpRiskTick();
+            break;
+          case "ref_price":
+            store.setRefPrice(payload);
+            break;
+          case "ref_status":
+            store.setRefStatus(payload.status);
             break;
         }
       };

@@ -139,3 +139,29 @@ export interface RiskOverview {
   alerts: RiskAlert[];
   thresholds: { concentration_limit_pct: string; utilization_warn_pct: string };
 }
+
+export type RefFeedStatus = "LIVE" | "STALE" | "DOWN";
+
+/** A Coinbase reference price. Display only; never feeds our book or marks. */
+export interface RefPrice {
+  symbol: string;
+  product_id: string;
+  price: string;
+  bid: string | null;
+  ask: string | null;
+  spread: string | null;
+  open_24h: string | null;
+  high_24h: string | null;
+  low_24h: string | null;
+  volume_24h: string | null;
+  change_24h: string | null;
+  change_24h_pct: string | null;
+  source_time: string | null;
+  received_at: string;
+}
+
+export interface RefPriceSnapshot {
+  status: RefFeedStatus;
+  source: string;
+  prices: RefPrice[];
+}

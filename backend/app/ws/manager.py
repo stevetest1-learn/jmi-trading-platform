@@ -52,6 +52,18 @@ class ConnectionManager:
         for ws in dead:
             self.disconnect(ws)
 
+    async def broadcast_all(self, type_: str, payload: dict) -> None:
+        """Every connected socket, regardless of account or subscriptions."""
+        message = self._envelope(type_, payload)
+        dead: list[WebSocket] = []
+        for ws in list(self._account_of):
+            try:
+                await ws.send_text(message)
+            except Exception:  # noqa: BLE001
+                dead.append(ws)
+        for ws in dead:
+            self.disconnect(ws)
+
     async def broadcast_risk(self, type_: str, payload: dict) -> None:
         message = self._envelope(type_, payload)
         dead: list[WebSocket] = []

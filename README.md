@@ -8,7 +8,7 @@ external FIX connectivity.
 
 > **Status:** a simulation that runs on a laptop. The FIX gateway is a template,
 > and the AWS stack is written and validated with Terraform but has not been
-> deployed. 30 backend tests plus a FIX end-to-end test pass.
+> deployed. 45 backend tests plus a FIX end-to-end test pass.
 
 ## What it looks like
 
@@ -124,6 +124,35 @@ accounts to watch a real cross-account trade happen live.
 - **Why `market_maker` starts with BTC/ETH inventory**: since shorting is
   disallowed, crypto can only enter the system via a fill against an
   account that already holds it — someone has to start non-zero.
+
+## Coinbase reference prices (view only)
+
+Under the BTC/USD and ETH/USD tabs, a bar shows the **real** Coinbase price:
+last, 24h change, bid/ask/spread, 24h high/low/volume and a sparkline, with a
+LIVE / STALE / OFFLINE badge. It is for looking at the market only. Nothing
+trades on Coinbase, and these prices never feed our order book, the marks
+behind exposure and P&L, or any order.
+
+- **One connection, many GUIs.** The backend holds a single connection to
+  Coinbase's public `ticker` feed (no API key) and pushes to every GUI over the
+  existing WebSocket. Ticks are coalesced to at most one push per symbol every
+  500ms. `GET /refprices` returns the latest prices so a page can render
+  immediately on load or reconnect.
+- **Follows the symbols table.** A symbol's Coinbase product is
+  `<base>-<quote>` (BTCUSD is BTC-USD), so adding a symbol Coinbase lists needs
+  no code change. Restart the backend to pick up a new one.
+- **Fails safe.** If Coinbase is unreachable the bar says OFFLINE and trading
+  carries on untouched. The feed reconnects with exponential backoff (1s up to
+  30s). A feed that connects but goes quiet turns STALE after 15s.
+- **Config:** `COINBASE_ENABLED` (default true), `COINBASE_WS_URL`,
+  `COINBASE_STALE_AFTER_SECONDS`, `COINBASE_PUSH_INTERVAL_MS`. The default is
+  Coinbase's production public feed, which has real prices. Their sandbox feed
+  (`wss://ws-feed-public.sandbox.exchange.coinbase.com`) serves made-up prices,
+  so it is not the default.
+- **Terms:** this is Coinbase's public market data. Check their terms before
+  showing it to anyone beyond personal or internal use.
+- **Note:** the demo order book is seeded around $60,000 BTC and $1,000 ETH, so
+  it will not match the live Coinbase price.
 
 ## Risk & Exposure tab (market maker only)
 

@@ -4,6 +4,7 @@ import { OpenOrdersPanel } from "../components/OpenOrdersPanel";
 import { OrderBookDepth } from "../components/OrderBookDepth";
 import { OrderEntryTicket } from "../components/OrderEntryTicket";
 import { PositionsPanel } from "../components/PositionsPanel";
+import { RefPriceBar } from "../components/RefPriceBar";
 import { RiskCockpit } from "../components/RiskCockpit";
 import { SymbolSelector } from "../components/SymbolSelector";
 import { useLiveConnection } from "../hooks/useLiveConnection";
@@ -84,6 +85,12 @@ export function TradingPage() {
 
       <div className="tab-pane" hidden={activeTab !== "trading"}>
       <SymbolSelector symbols={symbols} selected={selectedSymbol} onSelect={setSelectedSymbol} />
+      {selectedSymbol && (
+        <RefPriceBar
+          symbol={selectedSymbol}
+          displaySymbol={symbols.find((s) => s.symbol === selectedSymbol)?.display_symbol ?? selectedSymbol}
+        />
+      )}
 
       <main className="app-main">
         {selectedSymbol && (

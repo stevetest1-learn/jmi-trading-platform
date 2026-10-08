@@ -29,6 +29,18 @@ class Settings(BaseSettings):
     # Top-of-book depth levels pushed to WS clients / REST snapshots.
     book_depth_levels: int = 10
 
+    # Coinbase reference prices (app/marketdata). View-only: nothing here feeds
+    # the matching engine, marks or risk numbers. The default is Coinbase's
+    # PUBLIC production feed (real prices, no API key). Coinbase's sandbox feed
+    # (wss://ws-feed-public.sandbox.exchange.coinbase.com) serves made-up
+    # prices, so it is not the default.
+    coinbase_enabled: bool = True
+    coinbase_ws_url: str = "wss://ws-feed.exchange.coinbase.com"
+    # Seconds without a tick before the feed is reported STALE.
+    coinbase_stale_after_seconds: float = 15.0
+    # Ticks are coalesced and pushed to GUIs at most this often per symbol.
+    coinbase_push_interval_ms: int = 500
+
     # Risk & Exposure view (app/risk). Only these usernames may call
     # /risk/* or subscribe to the risk WS channel -- enforced server-side;
     # the UI merely hides the tab. Override via RISK_VIEWER_USERNAMES='["a","b"]'.

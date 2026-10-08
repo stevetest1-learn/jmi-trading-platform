@@ -42,6 +42,7 @@ export const api = {
   openOrders: () => request<import("../types").OrderResponse[]>("/orders?status_filter=open"),
   positions: () => request<import("../types").PositionResponse[]>("/positions"),
   blotter: () => request<import("../types").BlotterRow[]>("/blotter"),
+  refPrices: () => request<import("../types").RefPriceSnapshot>("/refprices"),
   riskOverview: () => request<import("../types").RiskOverview>("/risk/overview"),
   orderBook: (symbol: string) => request<import("../types").OrderBookSnapshot>(`/marketdata/${symbol}`),
 };
